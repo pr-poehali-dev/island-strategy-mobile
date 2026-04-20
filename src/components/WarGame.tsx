@@ -180,35 +180,61 @@ function isFreeIsland(state: GameState, r: number, c: number): boolean {
   return isFree(state, r, c);
 }
 
-// Подсчёт активных слотов зданий для игрока
-function getActiveSlots(state: GameState, player: PlayerId): number {
-  const windmills = state.buildings.filter(b => b.owner === player && b.type === 'windmill').length;
-  return windmills * 2; // каждый ветряк даёт 2 слота
+// Есть ли рабочий HQ (живой)
+function hasHQ(state: GameState, player: PlayerId): boolean {
+  return state.buildings.some(b => b.owner === player && b.type === 'hq');
 }
 
-// Подсчёт работающих зданий игрока (не считая ветряки сами по себе)
-function getWorkingBuildingCount(state: GameState, player: PlayerId): number {
-  return state.buildings.filter(b => b.owner === player && b.type !== 'windmill').length;
+// Количество ветряков игрока
+function windmillCount(state: GameState, player: PlayerId): number {
+  return state.buildings.filter(b => b.owner === player && b.type === 'windmill').length;
 }
 
-// Можно ли строить новое здание
-export function canBuildBuilding(state: GameState, player: PlayerId): boolean {
+// Количество заводов игрока
+function factoryCount(state: GameState, player: PlayerId): number {
+  return state.buildings.filter(b => b.owner === player && b.type === 'factory').length;
+}
+
+// Слоты: каждый ветряк даёт 2 слота; HQ + заводы занимают по 1 слоту
+function getFreeSlots(state: GameState, player: PlayerId): number {
+  const slots = windmillCount(state, player) * 2;
+  // занятые слоты = HQ (1) + заводы
+  const used = (hasHQ(state, player) ? 1 : 0) + factoryCount(state, player);
+  return slots - used;
+}
+
+// Можно ли построить здание в этот ход
+// Условие: есть HQ И ещё не строили в этот ход
+// Тип ветряк — всегда, если есть HQ (ветряки не занимают слоты сами себя)
+// Тип завод — если есть HQ + есть свободный слот (ветряков хватает)
+export function canBuildWindmill(state: GameState, player: PlayerId): boolean {
   if (state.builtBuildingThisTurn) return false;
-  const hasHQ = state.buildings.some(b => b.owner === player && b.type === 'hq');
-  if (!hasHQ) return false;
-  const slots = getActiveSlots(state, player);
-  const working = getWorkingBuildingCount(state, player);
-  return working < slots;
+  return hasHQ(state, player);
+}
+
+export function canBuildFactory(state: GameState, player: PlayerId): boolean {
+  if (state.builtBuildingThisTurn) return false;
+  if (!hasHQ(state, player)) return false;
+  return getFreeSlots(state, player) > 0;
+}
+
+export function canBuildBuilding(state: GameState, player: PlayerId): boolean {
+  return canBuildWindmill(state, player) || canBuildFactory(state, player);
 }
 
 // Сколько юнитов можно поставить в этот ход
+// Завод работает если есть HQ + ветряков хватает (слоты >= 0 после учёта завода)
 export function maxUnitsThisTurn(state: GameState, player: PlayerId): number {
-  const factories = state.buildings.filter(b => b.owner === player && b.type === 'factory');
-  const slots = getActiveSlots(state, player);
-  const working = getWorkingBuildingCount(state, player);
-  // Завод работает если working <= slots
-  const activeFactories = factories.filter(() => working <= slots).length;
-  return activeFactories;
+  if (!hasHQ(state, player)) return 0;
+  // Каждый завод, у которого хватает слотов, даёт 1 юнита
+  const windmills = windmillCount(state, player);
+  const factories = factoryCount(state, player);
+  const totalSlots = windmills * 2;
+  // HQ занимает 1 слот, каждый завод тоже 1 — считаем сколько заводов помещается
+  const hqSlot = 1;
+  const slotsForFactories = totalSlots - hqSlot;
+  const workingFactories = Math.min(factories, Math.max(0, slotsForFactories));
+  return workingFactories;
 }
 
 // Проверить что клетка связана с заводом через цепочку юнитов игрока

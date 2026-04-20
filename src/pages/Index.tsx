@@ -2,7 +2,8 @@ import { useState, useCallback } from 'react';
 import { generateIslandGrid, IslandGrid, GeneratedIsland } from '@/components/IslandGenerator';
 import {
   GameState, BuildingType, PlayerId,
-  createInitialState, canBuildBuilding, canPlaceUnit, maxUnitsThisTurn,
+  createInitialState, canBuildBuilding, canBuildWindmill, canBuildFactory,
+  canPlaceUnit, maxUnitsThisTurn,
   getAttackingUnits, placeUnit, buildBuilding, performAttacks, endTurn,
   WarMap,
 } from '@/components/WarGame';
@@ -374,6 +375,18 @@ export default function Index() {
           {!warState.winner && (
             <div className="border-t-2 px-3 py-3 flex-shrink-0" style={{ borderColor: 'var(--ink)', background: 'rgba(245,240,232,0.97)' }}>
 
+              {/* Счётчики убитых клеток */}
+              <div className="flex gap-4 mb-2 text-sm">
+                {([1, 2] as PlayerId[]).map(p => {
+                  const killed = warState.deadCells.filter(d => d.killer === p).length;
+                  return (
+                    <span key={p} style={{ color: p === 1 ? '#2563eb' : '#dc2626', fontWeight: 600 }}>
+                      {p === 1 ? '🔵' : '🔴'} убито: {killed}
+                    </span>
+                  );
+                })}
+              </div>
+
               {/* Статус хода */}
               <div className="flex gap-3 mb-2 text-sm flex-wrap">
                 {(() => {
@@ -388,7 +401,7 @@ export default function Index() {
                         {warState.builtBuildingThisTurn ? '✅ Здание построено' : canBuild ? '🔨 Строй ветряк или завод' : '🚫 Нет слотов'}
                       </span>
                       <span style={{ color: maxU > placed ? 'var(--grass-dark)' : 'var(--ink-light)' }}>
-                        ⚔️ Юнитов: {placed}/{maxU}
+                        • Точек: {placed}/{maxU}
                       </span>
                       <span style={{ color: attacks.length > 0 ? '#d44' : 'var(--ink-light)' }}>
                         💥 Атак: {attacks.length}
@@ -400,22 +413,23 @@ export default function Index() {
 
               {/* Кнопки */}
               <div className="flex flex-wrap gap-2">
-                {/* Строить здание: ветряк или завод — на выбор, одно за ход */}
-                {canBuildBuilding(warState, warState.currentPlayer) && !warState.builtBuildingThisTurn && (
-                  <>
-                    <button
-                      className={`text-base px-3 py-1 rounded transition-all ${warAction === 'build' && buildType === 'windmill' ? 'btn-ink' : 'btn-outline-ink'}`}
-                      onClick={() => handleSetAction('build', 'windmill')}
-                    >
-                      ⚙️ Ветряк
-                    </button>
-                    <button
-                      className={`text-base px-3 py-1 rounded transition-all ${warAction === 'build' && buildType === 'factory' ? 'btn-ink' : 'btn-outline-ink'}`}
-                      onClick={() => handleSetAction('build', 'factory')}
-                    >
-                      🏭 Завод
-                    </button>
-                  </>
+                {/* Ветряк — если есть HQ и ещё не строили */}
+                {canBuildWindmill(warState, warState.currentPlayer) && (
+                  <button
+                    className={`text-base px-3 py-1 rounded transition-all ${warAction === 'build' && buildType === 'windmill' ? 'btn-ink' : 'btn-outline-ink'}`}
+                    onClick={() => handleSetAction('build', 'windmill')}
+                  >
+                    ⚙️ Ветряк
+                  </button>
+                )}
+                {/* Завод — если есть HQ + свободный слот */}
+                {canBuildFactory(warState, warState.currentPlayer) && (
+                  <button
+                    className={`text-base px-3 py-1 rounded transition-all ${warAction === 'build' && buildType === 'factory' ? 'btn-ink' : 'btn-outline-ink'}`}
+                    onClick={() => handleSetAction('build', 'factory')}
+                  >
+                    🏭 Завод
+                  </button>
                 )}
 
                 {/* Поставить юнита */}
