@@ -156,8 +156,14 @@ export function createInitialState(rows: number, cols: number): GameState {
 
 // ─── Игровая логика ──────────────────────────────────────────────────────────
 
+// Вплотную (расстояние 1, без диагоналей и самой клетки)
 function isAdjacent(r1: number, c1: number, r2: number, c2: number): boolean {
   return Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1 && !(r1 === r2 && c1 === c2);
+}
+
+// Атакует на расстоянии ≤ 2 (вплотную ИЛИ через одну клетку-промежуток)
+function isAttackRange(r1: number, c1: number, r2: number, c2: number): boolean {
+  return Math.abs(r1 - r2) <= 2 && Math.abs(c1 - c2) <= 2 && !(r1 === r2 && c1 === c2);
 }
 
 function isFree(state: GameState, r: number, c: number): boolean {
@@ -244,7 +250,7 @@ export function canPlaceUnit(state: GameState, player: PlayerId, row: number, co
   return isConnectedToFactory(state, player, row, col);
 }
 
-// Юниты которые могут атаковать (рядом с врагом)
+// Юниты которые могут атаковать (вплотную или через 1 клетку-промежуток)
 export function getAttackingUnits(state: GameState, player: PlayerId): { unit: Unit; targets: (Building | Unit)[] }[] {
   const enemies = [
     ...state.buildings.filter(b => b.owner !== player),
@@ -253,7 +259,7 @@ export function getAttackingUnits(state: GameState, player: PlayerId): { unit: U
   const result: { unit: Unit; targets: (Building | Unit)[] }[] = [];
 
   for (const unit of state.units.filter(u => u.owner === player)) {
-    const targets = enemies.filter(e => isAdjacent(unit.row, unit.col, e.row, e.col));
+    const targets = enemies.filter(e => isAttackRange(unit.row, unit.col, e.row, e.col));
     if (targets.length > 0) result.push({ unit, targets });
   }
   return result;
@@ -413,36 +419,47 @@ export function WarMap({ state, onCellClick, highlightCells, cellSize = 28 }: Wa
       ctx.stroke();
     }
 
-    // Острова
+    // Острова (без мёртвых клеток — они рисуются отдельно)
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
         if (!grid[r][c]) continue;
         const x = c * cellSize;
         const y = r * cellSize;
-
-        // Проверяем мёртвые клетки
         const dead = state.deadCells.find(d => d.row === r && d.col === c);
-        if (dead) {
-          ctx.fillStyle = dead.killer === 1 ? P1_LIGHT : P2_LIGHT;
-          ctx.fillRect(x, y, cellSize, cellSize);
-          // Небрежная штриховка ручкой
-          ctx.strokeStyle = dead.killer === 1 ? P1_COLOR : P2_COLOR;
-          ctx.lineWidth = 1.5;
-          ctx.globalAlpha = 0.7;
-          for (let i = -cellSize; i < cellSize * 2; i += 5) {
-            const wobble1 = (Math.random() - 0.5) * 2;
-            const wobble2 = (Math.random() - 0.5) * 2;
-            ctx.beginPath();
-            ctx.moveTo(x + Math.max(0, i) + wobble1, y + wobble1);
-            ctx.lineTo(x + Math.min(cellSize, i + cellSize) + wobble2, y + cellSize + wobble2);
-            ctx.stroke();
-          }
-          ctx.globalAlpha = 1;
-        } else {
+        if (!dead) {
           ctx.fillStyle = '#c8d89a';
           ctx.fillRect(x, y, cellSize + 0.5, cellSize + 0.5);
         }
       }
+    }
+
+    // Мёртвые клетки — закрашиваются полностью цветом победителя (на острове и на воде)
+    for (const dead of state.deadCells) {
+      const x = dead.col * cellSize;
+      const y = dead.row * cellSize;
+      const color = dead.killer === 1 ? P1_COLOR : P2_COLOR;
+      const light = dead.killer === 1 ? P1_LIGHT : P2_LIGHT;
+
+      // Полная заливка
+      ctx.fillStyle = light;
+      ctx.fillRect(x, y, cellSize, cellSize);
+
+      // Небрежная штриховка ручкой поверх
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.8;
+      ctx.globalAlpha = 0.75;
+      for (let i = -cellSize; i < cellSize * 2; i += 4) {
+        ctx.beginPath();
+        ctx.moveTo(x + Math.max(0, i) + (Math.random() - 0.5) * 1.5, y + (Math.random() - 0.5) * 1.5);
+        ctx.lineTo(x + Math.min(cellSize, i + cellSize) + (Math.random() - 0.5) * 1.5, y + cellSize + (Math.random() - 0.5) * 1.5);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+
+      // Жирная рамка поверх
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(x + 1, y + 1, cellSize - 2, cellSize - 2);
     }
 
     // Подсветка доступных клеток
