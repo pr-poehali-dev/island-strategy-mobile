@@ -4,89 +4,48 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 43 35% 94%;
+    --foreground: 25 30% 18%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 42 40% 97%;
+    --card-foreground: 25 30% 18%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 42 40% 97%;
+    --popover-foreground: 25 30% 18%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 25 30% 18%;
+    --primary-foreground: 42 40% 97%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 43 25% 88%;
+    --secondary-foreground: 25 30% 18%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 43 25% 88%;
+    --muted-foreground: 25 15% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 168 45% 38%;
+    --accent-foreground: 42 40% 97%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 42 40% 97%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 35 20% 78%;
+    --input: 35 20% 78%;
+    --ring: 25 30% 18%;
 
-    --radius: 0.5rem;
+    --radius: 0.3rem;
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Island game colors */
+    --paper: #f5f0e8;
+    --ink: #2c1f14;
+    --ink-light: #5c4a38;
+    --water: #a8ccd7;
+    --water-dark: #7aabb9;
+    --sand: #d4b896;
+    --grass: #7ab87a;
+    --grass-dark: #5a9a5a;
+    --highlight: #e8a855;
+    --pink-island: #d4887a;
+    --purple-island: #9a7ab8;
   }
 }
 
@@ -97,5 +56,196 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: "Caveat", cursive;
+    background-color: var(--paper);
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 27px,
+        rgba(180, 160, 130, 0.15) 27px,
+        rgba(180, 160, 130, 0.15) 28px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 27px,
+        rgba(180, 160, 130, 0.08) 27px,
+        rgba(180, 160, 130, 0.08) 28px
+      );
   }
+}
+
+/* Рукописный стиль для кнопок */
+.btn-ink {
+  font-family: "Caveat", cursive;
+  font-size: 1.2rem;
+  font-weight: 600;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: 4px;
+  padding: 10px 24px;
+  cursor: pointer;
+  position: relative;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+  box-shadow: 3px 3px 0px var(--ink-light);
+  letter-spacing: 0.03em;
+}
+
+.btn-ink:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px var(--ink-light);
+}
+
+.btn-ink:active {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0px var(--ink-light);
+}
+
+.btn-outline-ink {
+  font-family: "Caveat", cursive;
+  font-size: 1.1rem;
+  font-weight: 600;
+  background: transparent;
+  color: var(--ink);
+  border: 2.5px solid var(--ink);
+  border-radius: 4px;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.btn-outline-ink:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+/* Ячейка сетки */
+.grid-cell {
+  border: 1.5px solid rgba(44, 31, 20, 0.2);
+  transition: background 0.2s;
+  cursor: pointer;
+  position: relative;
+}
+
+.grid-cell:hover {
+  background: rgba(44, 31, 20, 0.06) !important;
+}
+
+/* Анимации */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(-1deg);
+  }
+  50% {
+    transform: rotate(1deg);
+  }
+}
+
+@keyframes inkDraw {
+  from {
+    stroke-dashoffset: 1000;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out both;
+}
+
+.animate-wiggle {
+  animation: wiggle 0.5s ease-in-out;
+}
+
+/* Тетрадный лист эффект */
+.paper-card {
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  box-shadow:
+    4px 4px 0px var(--ink-light),
+    6px 6px 0px rgba(44, 31, 20, 0.1);
+  position: relative;
+}
+
+.paper-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    transparent,
+    transparent 27px,
+    rgba(180, 160, 130, 0.2) 27px,
+    rgba(180, 160, 130, 0.2) 28px
+  );
+  pointer-events: none;
+  border-radius: 4px;
+}
+
+/* Красная линия слева — как в тетради */
+.paper-card.lined::after {
+  content: "";
+  position: absolute;
+  left: 44px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(200, 100, 100, 0.3);
+  pointer-events: none;
+}
+
+.island-counter {
+  font-family: "Caveat", cursive;
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--ink);
+}
+
+/* Скролл */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--ink-light);
+  border-radius: 3px;
 }
