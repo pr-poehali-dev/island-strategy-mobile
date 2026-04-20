@@ -385,7 +385,7 @@ export default function Index() {
                   return (
                     <>
                       <span style={{ color: canBuild && !warState.builtBuildingThisTurn ? 'var(--grass-dark)' : 'var(--ink-light)' }}>
-                        {warState.builtBuildingThisTurn ? '✅ Здание построено' : canBuild ? '🔨 Можно строить' : '🚫 Нельзя строить'}
+                        {warState.builtBuildingThisTurn ? '✅ Здание построено' : canBuild ? '🔨 Строй ветряк или завод' : '🚫 Нет слотов'}
                       </span>
                       <span style={{ color: maxU > placed ? 'var(--grass-dark)' : 'var(--ink-light)' }}>
                         ⚔️ Юнитов: {placed}/{maxU}
@@ -400,14 +400,22 @@ export default function Index() {
 
               {/* Кнопки */}
               <div className="flex flex-wrap gap-2">
-                {/* Строить завод */}
+                {/* Строить здание: ветряк или завод — на выбор, одно за ход */}
                 {canBuildBuilding(warState, warState.currentPlayer) && !warState.builtBuildingThisTurn && (
-                  <button
-                    className={`text-base px-3 py-1 rounded transition-all ${warAction === 'build' && buildType === 'factory' ? 'btn-ink' : 'btn-outline-ink'}`}
-                    onClick={() => handleSetAction('build', 'factory')}
-                  >
-                    🏭 Завод
-                  </button>
+                  <>
+                    <button
+                      className={`text-base px-3 py-1 rounded transition-all ${warAction === 'build' && buildType === 'windmill' ? 'btn-ink' : 'btn-outline-ink'}`}
+                      onClick={() => handleSetAction('build', 'windmill')}
+                    >
+                      ⚙️ Ветряк
+                    </button>
+                    <button
+                      className={`text-base px-3 py-1 rounded transition-all ${warAction === 'build' && buildType === 'factory' ? 'btn-ink' : 'btn-outline-ink'}`}
+                      onClick={() => handleSetAction('build', 'factory')}
+                    >
+                      🏭 Завод
+                    </button>
+                  </>
                 )}
 
                 {/* Поставить юнита */}
@@ -437,7 +445,7 @@ export default function Index() {
               {warAction !== 'idle' && (
                 <div className="mt-2 text-sm px-3 py-1 rounded" style={{ background: 'rgba(232,168,85,0.2)', color: 'var(--ink)' }}>
                   {warAction === 'place-unit' && '👆 Нажми на жёлтую клетку рядом с заводом или юнитом'}
-                  {warAction === 'build' && `👆 Нажми на жёлтую клетку на своём острове для постройки: ${BUILDING_NAMES[buildType]}`}
+                  {warAction === 'build' && `👆 Выбери клетку на своём острове → ${BUILDING_NAMES[buildType]}`}
                 </div>
               )}
 
@@ -507,7 +515,8 @@ export default function Index() {
             {[
               { icon: '🏰', title: 'Главное здание', text: 'Стартовое здание каждого игрока. Позволяет строить другие здания. Если уничтожено — проигрыш.' },
               { icon: '⚙️', title: 'Ветряк', text: 'Стартовое здание. Даёт 2 слота для зданий. Без ветряка ничего не работает.' },
-              { icon: '🏭', title: 'Завод', text: 'Строится в ход при наличии HQ + ветряка со свободным слотом. Производит 1 юнита в ход.' },
+              { icon: '🏭', title: 'Завод', text: 'Строится за один ход при наличии HQ + ветряка со свободным слотом. Производит 1 юнита в ход. Нужен для постройки точек.' },
+              { icon: '⚙️+🏭', title: 'Выбор здания', text: 'За один ход можно построить одно здание на выбор — ветряк (даёт +2 слота) или завод (даёт +1 юнит в ход). Строить и точки, и здание в один ход можно.' },
               { icon: '•', title: 'Юнит (точка)', text: 'Ставится рядом с заводом или рядом с цепочкой юнитов от завода. 1 HP. Атакует соседние вражеские клетки (до 1 клетки).' },
               { icon: '💥', title: 'Атака', text: 'Автоматически: все твои юниты рядом с врагами атакуют. Юниты: 1 HP. Здания: 2 HP. Убитая клетка закрашивается цветом победителя.' },
             ].map((r, i) => (
