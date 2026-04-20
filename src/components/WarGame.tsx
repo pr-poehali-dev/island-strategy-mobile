@@ -161,11 +161,17 @@ function isAdjacent(r1: number, c1: number, r2: number, c2: number): boolean {
 }
 
 function isFree(state: GameState, r: number, c: number): boolean {
-  if (!state.grid[r]?.[c]) return false;
+  if (r < 0 || r >= state.rows || c < 0 || c >= state.cols) return false;
   if (state.buildings.some(b => b.row === r && b.col === c)) return false;
   if (state.units.some(u => u.row === r && u.col === c)) return false;
   if (state.deadCells.some(d => d.row === r && d.col === c)) return false;
   return true;
+}
+
+// isFree только для зданий — только на острове
+function isFreeIsland(state: GameState, r: number, c: number): boolean {
+  if (!state.grid[r]?.[c]) return false;
+  return isFree(state, r, c);
 }
 
 // Подсчёт активных слотов зданий для игрока
@@ -278,12 +284,11 @@ export function placeUnit(state: GameState, row: number, col: number): GameState
 export function buildBuilding(state: GameState, type: BuildingType, row: number, col: number): GameState {
   const player = state.currentPlayer;
   if (!canBuildBuilding(state, player)) return state;
-  if (!isFree(state, row, col)) return state;
+  if (!isFreeIsland(state, row, col)) return state;
   // Здание должно быть на своём острове
   const midCol = Math.floor(state.cols / 2);
   const isOwnIsland = (player === 1 && col < midCol) || (player === 2 && col >= midCol);
   if (!isOwnIsland) return state;
-  if (!state.grid[row]?.[col]) return state;
 
   const building: Building = {
     id: `b${Date.now()}-${Math.random()}`,
@@ -446,7 +451,9 @@ export function WarMap({ state, onCellClick, highlightCells, cellSize = 28 }: Wa
         const [r, c] = key.split(',').map(Number);
         const x = c * cellSize;
         const y = r * cellSize;
-        ctx.fillStyle = 'rgba(255, 220, 50, 0.35)';
+        const onWater = !grid[r]?.[c];
+        // На воде подсветка ярче
+        ctx.fillStyle = onWater ? 'rgba(255, 220, 50, 0.55)' : 'rgba(255, 220, 50, 0.35)';
         ctx.fillRect(x, y, cellSize, cellSize);
         ctx.strokeStyle = 'rgba(200, 160, 0, 0.8)';
         ctx.lineWidth = 1.5;
@@ -529,11 +536,20 @@ export function WarMap({ state, onCellClick, highlightCells, cellSize = 28 }: Wa
       }
     }
 
-    // Юниты — точки
+    // Юниты — точки (могут быть на воде)
     for (const u of state.units) {
       const x = u.col * cellSize + cellSize / 2;
       const y = u.row * cellSize + cellSize / 2;
       const color = u.owner === 1 ? P1_COLOR : P2_COLOR;
+      const onWater = !state.grid[u.row]?.[u.col];
+
+      // На воде — белая подложка чтобы точка была видна
+      if (onWater) {
+        ctx.fillStyle = 'rgba(255,255,255,0.75)';
+        ctx.beginPath();
+        ctx.arc(x, y, cellSize * 0.38, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       // Тень
       ctx.fillStyle = 'rgba(44,31,20,0.2)';
